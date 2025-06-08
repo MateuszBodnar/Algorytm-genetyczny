@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 class Osobnik
 {
     public List<byte> chromosom;
@@ -136,7 +137,10 @@ class Turniej
             nowa_populacja.Add(najlepszy_z_turnieju);
             sklad_turnieju.Clear();
         }
+    }
 
+    public void HotDeck()
+    {
         Osobnik najlepszy = populacja[0];
 
         foreach (var osobnik in populacja)
@@ -148,8 +152,11 @@ class Turniej
         }
 
         nowa_populacja.Add(najlepszy);
+    }
 
-        foreach(var osobnik in nowa_populacja)
+    public void Mutacja()
+    {
+        foreach (var osobnik in nowa_populacja)
         {
             int punkt = random.Next(0, osobnik.chromosom.Count);
 
@@ -158,11 +165,10 @@ class Turniej
             osobnik.Dekodowanie();
             osobnik.FunkcjaPrzystosowania();
         }
-        
+
         populacja.Clear();
         populacja.AddRange(nowa_populacja);
         nowa_populacja.Clear();
-
     }
 }
 
