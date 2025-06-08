@@ -94,6 +94,8 @@ class Turniej
 
     public Turniej(int rozmiarTurnieju, int liczbaOsobnikow)
     {
+        this.populacja = new List<Osobnik>();
+        this.nowa_populacja = new List<Osobnik>();
         this.RozmiarTurnieju = rozmiarTurnieju;
         this.LiczbaOsobinkow = liczbaOsobnikow;
     }
@@ -116,8 +118,6 @@ class Turniej
 
         for (int i = 0; i < LiczbaOsobinkow - 1; i++)
         {
-    
-
             for (int j = 0; j < RozmiarTurnieju; j++)
             {
                 int index = random.Next(0, LiczbaOsobinkow);
@@ -130,12 +130,26 @@ class Turniej
             {
                 if (osobnik.ocena > najlepszy_z_turnieju.ocena)
                 {
-                    najlepszy_z_turnieju.ocena = osobnik.ocena;
+                    najlepszy_z_turnieju = osobnik;
                 }
             }
 
             nowa_populacja.Add(najlepszy_z_turnieju);
             sklad_turnieju.Clear();
+           
+        }
+    }
+    public void Mutacja()
+    {
+        foreach (var osobnik in nowa_populacja)
+        {
+            int punkt = random.Next(0, osobnik.chromosom.Count);
+
+            osobnik.chromosom[punkt] = (byte)(1 - osobnik.chromosom[punkt]);
+
+            osobnik.Dekodowanie();
+            osobnik.FunkcjaPrzystosowania();
+
         }
     }
 
@@ -154,21 +168,24 @@ class Turniej
         nowa_populacja.Add(najlepszy);
     }
 
-    public void Mutacja()
+
+    public void MaxSredniaWartosc()
     {
+        Osobnik najwiekszaWartosc = nowa_populacja[0];
+        double srednia = 0;
+
         foreach (var osobnik in nowa_populacja)
         {
-            int punkt = random.Next(0, osobnik.chromosom.Count);
-
-            osobnik.chromosom[punkt] = (byte)(1 - osobnik.chromosom[punkt]);
-
-            osobnik.Dekodowanie();
-            osobnik.FunkcjaPrzystosowania();
+            if (osobnik.ocena > najwiekszaWartosc.ocena)
+            {
+                najwiekszaWartosc = osobnik;
+            }
+            srednia += osobnik.ocena;
         }
 
-        populacja.Clear();
-        populacja.AddRange(nowa_populacja);
-        nowa_populacja.Clear();
+
+
+        Console.WriteLine($" Największa wartość: {string.Join(" ", najwiekszaWartosc.ocena)}, Średnia wartość: {string.Join(" | ",  srednia/nowa_populacja.Count)}");
     }
 }
 
@@ -190,6 +207,12 @@ class Program
         for (int i = 0; i < 20; i++)
         {
             turniej.OperatorSelekcjiTurniejowej();
+            turniej.Mutacja();
+            turniej.HotDeck();
+            turniej.MaxSredniaWartosc();
+            populacja.Clear();
+            populacja.AddRange(turniej.nowa_populacja);
+            turniej.nowa_populacja.Clear();
         }
 
         Console.WriteLine();
