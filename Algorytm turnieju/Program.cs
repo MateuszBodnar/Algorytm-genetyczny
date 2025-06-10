@@ -26,6 +26,17 @@ class Osobnik
         this.FunkcjaPrzystosowania();
     }
 
+    public Osobnik(Osobnik inny)
+    {
+        this.chromosom = new List<byte>(inny.chromosom);
+        this.wartosc_parametru = new List<double>(inny.wartosc_parametru);
+        this.Zd_min = inny.Zd_min;
+        this.Zd_max = inny.Zd_max;
+        this.dlugosc_chromosomu = inny.dlugosc_chromosomu;
+        this.ilosc_parametrow = inny.ilosc_parametrow;
+        this.ocena = inny.ocena;
+    }
+
     public void GenerujChromosom()
     {
         chromosom = new List<byte>();
@@ -86,6 +97,7 @@ class Osobnik
 class Turniej
 {
     public List<Osobnik> populacja;
+    public List<Osobnik> stara_populacja;
     public List<Osobnik> nowa_populacja;
     public int RozmiarTurnieju;
     public int LiczbaOsobinkow;
@@ -122,6 +134,7 @@ class Turniej
             {
                 int index = random.Next(0, LiczbaOsobinkow);
                 sklad_turnieju.Add(populacja[index]);
+              
             }
 
             Osobnik najlepszy_z_turnieju = sklad_turnieju[0];
@@ -133,26 +146,12 @@ class Turniej
                     najlepszy_z_turnieju = osobnik;
                 }
             }
-
-            nowa_populacja.Add(najlepszy_z_turnieju);
+            nowa_populacja.Add(new Osobnik(najlepszy_z_turnieju));
             sklad_turnieju.Clear();
-           
-        }
-    }
-    public void Mutacja()
-    {
-        foreach (var osobnik in nowa_populacja)
-        {
-            int punkt = random.Next(0, osobnik.chromosom.Count);
-
-            osobnik.chromosom[punkt] = (byte)(1 - osobnik.chromosom[punkt]);
-
-            osobnik.Dekodowanie();
-            osobnik.FunkcjaPrzystosowania();
 
         }
+       
     }
-
     public void HotDeck()
     {
         Osobnik najlepszy = populacja[0];
@@ -168,6 +167,18 @@ class Turniej
         nowa_populacja.Add(najlepszy);
     }
 
+    public void Mutacja()
+    {
+        foreach (var osobnik in nowa_populacja)
+        {
+            int punkt = random.Next(0, osobnik.chromosom.Count);
+
+            osobnik.chromosom[punkt] = (byte)(1 - osobnik.chromosom[punkt]);
+
+            osobnik.Dekodowanie();
+            osobnik.FunkcjaPrzystosowania();
+        }
+    }
 
     public void MaxSredniaWartosc()
     {
@@ -180,6 +191,10 @@ class Turniej
             {
                 najwiekszaWartosc = osobnik;
             }
+        }
+
+        foreach (var osobnik in nowa_populacja)
+        {
             srednia += osobnik.ocena;
         }
 
@@ -194,6 +209,8 @@ class Program
     static void Main(string[] args)
     {
         List<Osobnik> populacja = Turniej.GenerujPopulacje(9, 0, 100, 3, 2);
+
+        Console.WriteLine("PIerwsza Popaulacja.");
 
         foreach (var osobnik in populacja)
         {
@@ -210,7 +227,7 @@ class Program
             turniej.Mutacja();
             turniej.HotDeck();
             turniej.MaxSredniaWartosc();
-            populacja.Clear();
+            turniej.populacja.Clear();
             populacja.AddRange(turniej.nowa_populacja);
             turniej.nowa_populacja.Clear();
         }
