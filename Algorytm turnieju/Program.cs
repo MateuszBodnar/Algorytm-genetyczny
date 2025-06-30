@@ -152,6 +152,7 @@ class Turniej
         }
        
     }
+    
     public void HotDeck()
     {
         Osobnik najlepszy = populacja[0];
@@ -200,9 +201,53 @@ class Turniej
 
 
 
-        Console.WriteLine($" Największa wartość: {string.Join(" ", najwiekszaWartosc.ocena)}, Średnia wartość: {string.Join(" | ",  srednia/nowa_populacja.Count)}");
+        Console.WriteLine($" Największa wartość: {string.Join(" ", Math.Round(najwiekszaWartosc.ocena,2))}, Średnia wartość: {string.Join(" | ",  Math.Round(srednia/nowa_populacja.Count,2))}");
+    }
+
+    public void OperatorKrzyżowania()
+    {
+        for (int i = 0; i < nowa_populacja.Count - 1; i += 2)
+        {
+            Osobnik rodzic1 = nowa_populacja[i];
+            Osobnik rodzic2 = nowa_populacja[i + 1];
+
+            // Liczba parametrów na podstawie jednego rodzica
+            int liczbaParametrow = rodzic1.ilosc_parametrow;
+
+            // Długość całego chromosomu
+            int punkt_ciecia = random.Next(1, rodzic1.chromosom.Count - 1);
+
+            // Tworzymy dzieci
+            List<byte> chromosom_dziecka1 = new List<byte>();
+            List<byte> chromosom_dziecka2 = new List<byte>();
+
+            // Jedno dziecko to początek rodzica1 + koniec rodzica2
+            chromosom_dziecka1.AddRange(rodzic1.chromosom.GetRange(0, punkt_ciecia));
+            chromosom_dziecka1.AddRange(rodzic2.chromosom.GetRange(punkt_ciecia, rodzic2.chromosom.Count - punkt_ciecia));
+
+            // Drugie dziecko to początek rodzica2 + koniec rodzica1
+            chromosom_dziecka2.AddRange(rodzic2.chromosom.GetRange(0, punkt_ciecia));
+            chromosom_dziecka2.AddRange(rodzic1.chromosom.GetRange(punkt_ciecia, rodzic1.chromosom.Count - punkt_ciecia));
+
+            // Tworzymy osobniki potomne
+            Osobnik dziecko1 = new Osobnik(rodzic1);
+            dziecko1.chromosom = chromosom_dziecka1;
+            dziecko1.Dekodowanie();
+            dziecko1.FunkcjaPrzystosowania();
+
+            Osobnik dziecko2 = new Osobnik(rodzic2);
+            dziecko2.chromosom = chromosom_dziecka2;
+            dziecko2.Dekodowanie();
+            dziecko2.FunkcjaPrzystosowania();
+
+            // Dodajemy dzieci do nowej populacji
+            nowa_populacja.Add(dziecko1);
+            nowa_populacja.Add(dziecko2);
+        }
     }
 }
+
+
 
 class Program
 {
